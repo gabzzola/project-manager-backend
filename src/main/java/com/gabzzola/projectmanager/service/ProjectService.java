@@ -1,7 +1,10 @@
 package com.gabzzola.projectmanager.service;
 
-import com.gabzzola.projectmanager.dto.ProjectUpdateDTO;
+import com.gabzzola.projectmanager.dto.project.ProjectCreateDTO;
+import com.gabzzola.projectmanager.dto.project.ProjectResponseDTO;
+import com.gabzzola.projectmanager.dto.project.ProjectUpdateDTO;
 import com.gabzzola.projectmanager.exception.NotFoundException;
+import com.gabzzola.projectmanager.mapper.ProjectMapper;
 import com.gabzzola.projectmanager.model.ProjectModel;
 import com.gabzzola.projectmanager.repository.ProjectRepository;
 import org.springframework.stereotype.Service;
@@ -12,35 +15,46 @@ import java.util.List;
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
+    private final ProjectMapper projectMapper;
 
-    public ProjectService(ProjectRepository projectRepository) {
+    public ProjectService(ProjectRepository projectRepository, ProjectMapper projectMapper) {
         this.projectRepository = projectRepository;
+        this.projectMapper = projectMapper;
     }
 
-    public List<ProjectModel> findAll() {
-        return projectRepository.findAll();
+    public ProjectResponseDTO create(ProjectCreateDTO dto) {
+        ProjectModel project = projectMapper.toModel(dto);
+        ProjectModel savedProject = projectRepository.save(project);
+        return projectMapper.toResponseDTO(savedProject);
     }
 
-    public ProjectModel findById(Long id) {
-        return projectRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Projeto não encontrado"));
+    public List<ProjectResponseDTO> findAll() {
+        return projectRepository.findAll().stream()
+                .map(projectMapper::toResponseDTO)
+                .toList();
     }
 
-    public ProjectModel create(ProjectModel project) {
-        return projectRepository.save(project);
+    public ProjectResponseDTO findById(Long id) {
+        ProjectModel project = getProjectEntityById(id);
+        return projectMapper.toResponseDTO(project);
     }
 
-    public ProjectModel update(Long id, ProjectUpdateDTO dto) {
-        ProjectModel existingProject = this.findById(id);
+    public ProjectResponseDTO update(Long id, ProjectUpdateDTO dto) {
+        ProjectModel project = getProjectEntityById(id);
 
-        if (dto.getName() != null) existingProject.setName(dto.getName());
-        if (dto.getBudget() != null) existingProject.setBudget(dto.getBudget());
+        projectMapper.updateFromDTO(dto, project);
 
-        return projectRepository.save(existingProject);
+        ProjectModel updatedProject = projectRepository.save(project);
+        return projectMapper.toResponseDTO(updatedProject);
     }
 
     public void delete(Long id) {
-        ProjectModel project = this.findById(id);
+        ProjectModel project = getProjectEntityById(id);
         projectRepository.delete(project);
+    }
+
+    private ProjectModel getProjectEntityById(Long id) {
+        return projectRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Projeto não encontrado"));
     }
 }
