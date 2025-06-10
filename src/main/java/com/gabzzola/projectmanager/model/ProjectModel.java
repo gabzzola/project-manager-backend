@@ -21,4 +21,7 @@ public class ProjectModel {
 
     @Column(name = "budget", precision = 19, scale = 4, nullable = false)
     private BigDecimal budget;
+
+    @Column(name = "deleted")
+    private boolean deleted = false;
 }

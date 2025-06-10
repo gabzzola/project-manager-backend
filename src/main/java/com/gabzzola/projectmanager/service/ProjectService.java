@@ -7,6 +7,7 @@ import com.gabzzola.projectmanager.exception.NotFoundException;
 import com.gabzzola.projectmanager.mapper.ProjectMapper;
 import com.gabzzola.projectmanager.model.ProjectModel;
 import com.gabzzola.projectmanager.repository.ProjectRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,7 +30,7 @@ public class ProjectService {
     }
 
     public List<ProjectResponseDTO> findAll() {
-        return projectRepository.findAll().stream()
+        return projectRepository.findByDeletedFalse().stream()
                 .map(projectMapper::toResponseDTO)
                 .toList();
     }
@@ -48,13 +49,13 @@ public class ProjectService {
         return projectMapper.toResponseDTO(updatedProject);
     }
 
+    @Transactional
     public void delete(Long id) {
-        ProjectModel project = getProjectEntityById(id);
-        projectRepository.delete(project);
+        projectRepository.softDelete(id);
     }
 
     private ProjectModel getProjectEntityById(Long id) {
-        return projectRepository.findById(id)
+        return projectRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Projeto não encontrado"));
     }
 }
