@@ -27,4 +27,15 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, String>> handleGenericException(Exception ex) {
+        Map<String, String> errors = new HashMap<>();
+
+        errors.put("error", "Ocorreu um erro interno. Por favor, tente novamente mais tarde");
+        errors.put("exception", ex.getClass().getSimpleName());
+        errors.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(errors, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }
