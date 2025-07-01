@@ -4,14 +4,13 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "projects")
-public class ProjectModel {
+@Table(name = "categories")
+public class CategoryModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,12 +19,11 @@ public class ProjectModel {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false, precision = 19, scale = 4)
-    private BigDecimal budget;
+    @Column(nullable = false)
+    private String textColor;
 
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    private CategoryModel category;
+    @Column(nullable = false)
+    private String backgroundColor;
 
     @Column(nullable = false)
     private boolean deleted = false;

@@ -5,6 +5,7 @@ import com.gabzzola.projectmanager.dto.project.ProjectResponseDTO;
 import com.gabzzola.projectmanager.dto.project.ProjectUpdateDTO;
 import com.gabzzola.projectmanager.exception.NotFoundException;
 import com.gabzzola.projectmanager.mapper.ProjectMapper;
+import com.gabzzola.projectmanager.model.CategoryModel;
 import com.gabzzola.projectmanager.model.ProjectModel;
 import com.gabzzola.projectmanager.repository.ProjectRepository;
 import jakarta.transaction.Transactional;
@@ -17,10 +18,12 @@ public class ProjectService {
 
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
+    private final CategoryService categoryService;
 
-    public ProjectService(ProjectRepository projectRepository, ProjectMapper projectMapper) {
+    public ProjectService(ProjectRepository projectRepository, ProjectMapper projectMapper, CategoryService categoryService) {
         this.projectRepository = projectRepository;
         this.projectMapper = projectMapper;
+        this.categoryService = categoryService;
     }
 
     public ProjectResponseDTO create(ProjectCreateDTO dto) {
@@ -44,6 +47,11 @@ public class ProjectService {
         ProjectModel project = getProjectEntityById(id);
 
         projectMapper.updateFromDTO(dto, project);
+
+        if (dto.categoryId() != null) {
+            CategoryModel category = categoryService.getCategoryEntityById(dto.categoryId());
+            project.setCategory(category);
+        }
 
         ProjectModel updatedProject = projectRepository.save(project);
         return projectMapper.toResponseDTO(updatedProject);
