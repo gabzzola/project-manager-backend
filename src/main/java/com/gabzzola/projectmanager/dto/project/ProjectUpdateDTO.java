@@ -12,5 +12,7 @@ public record ProjectUpdateDTO(
 
         @NotNull(message = "O orçamento é obrigatório")
         @Positive(message = "O orçamento deve ser maior que zero")
-        BigDecimal budget
+        BigDecimal budget,
+
+        Long categoryId
 ) {}
